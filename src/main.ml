@@ -20,6 +20,14 @@ let main () =
     let (w,h) = Image_tools.get_dim pic in
     let surface = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     Image_tools.print_image pic surface;
+    wait_key();
+
+    (*test de matrice de convolution*)
+    let pic2 = Sdlvideo.create_RGB_surface_format pic [] w h
+    and m = Conv_matrix.repoussage () in
+    Image_tools.apply_matrix pic pic2 m 0;
+    Image_tools.print_image pic2 surface;
+    (*fin du test*)
     wait_key ();
     exit 0
   end
