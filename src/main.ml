@@ -5,7 +5,6 @@ let sdl_init() =
     Sdlevent.enable_events Sdlevent.all_events_mask;
   end
 
-
 let rec wait_key () =
   let e = Sdlevent.wait_event () in
   match e with
