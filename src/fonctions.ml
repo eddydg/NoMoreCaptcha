@@ -42,25 +42,26 @@ let sansBruit src dst =
     done
 
 (*FILTRE NOIR ET BLANC*)
-let moyenne_couleur src r =
+let moyenne_couleur src =
+	let r =ref 0. in
 	let x,y,z = Sdlvideo.surface_dims src in
 	for i = 0 to x do
 	  for j = 0  to y do
 	    let a,b,c = (Sdlvideo.get_pixel_color src i j) in
-		r = (r +. ((float_of_int(a+b+c))/.3.))
+		let res = (float_of_int(a+b+c))/.3. in
+		r := (!r +. res); 
 	  done;
 	done;
-	Printf.printf "%f" r;
-	(r/.(float_of_int(x*y)))
+	(!r/.(float_of_int(x*y)))
 
 let blackAndWhite src dst =
         let x,y,z = Sdlvideo.surface_dims src in
-	let moyenne = moyenne_couleur src 0. in
-                Printf.printf "%f" moyenne;
+	let moyenne = moyenne_couleur src in
+               (* Printf.printf "%d\n" (int_of_float moyenne);*)
 		for i = 0 to x do
                         for j = 0 to y do
                         let a = level (Sdlvideo.get_pixel_color src i j) in
-                                if (a < (moyenne)) then
+                                if (a < (moyenne -. 95.)) then
                                         Sdlvideo.put_pixel_color dst i j (0, 0, 0)
                                 else
                                         Sdlvideo.put_pixel_color dst i j (255, 255, 255)
