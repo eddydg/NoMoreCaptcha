@@ -19,7 +19,7 @@ let rotate (x,y) (cx,cy) angle =
        +. ((float_of_int(y)) -. cy) *. cos a
        +. cy 
   in
-  (xf, yf);;
+  (xf, yf)
 
 (* Get the dimensions of image after rotation *)
 let dims_rot w h angle =

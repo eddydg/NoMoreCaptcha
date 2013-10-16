@@ -8,12 +8,13 @@ let color2grey (a,b,c) =
         (int_of_float x,int_of_float x,int_of_float x)
 
 let image2grey src dst =
-        let x,y,z = Sdlvideo.surface_dims src in
-                for i = 0 to x do
-                        for j = 0 to y do
-Sdlvideo.put_pixel_color dst i j (color2grey (Sdlvideo.get_pixel_color src i j));
-                        done;
-                done
+  let x,y,z = Sdlvideo.surface_dims src in
+    for i = 0 to x do
+      for j = 0 to y do
+        Sdlvideo.put_pixel_color dst i j (color2grey (Sdlvideo.get_pixel_color src i j));
+      done;
+    done
+
 (*FILTRE BRUIT*)
 let rec sort = function
   | [] -> []
@@ -34,7 +35,7 @@ let median l = let l1 = sort l in
 let g_color src i j = Sdlvideo.get_pixel_color src i j
 
 let sansBruit src dst =
-  let x,y,z = Sdlvideo.surface_dims src in
+  let x,y,_ = Sdlvideo.surface_dims src in
     for i = 1 to (x-1) do
       for j = 1 to (y-1) do
         Sdlvideo.put_pixel_color dst i j (median [g_color src (i-1) j; g_color src (i-1) (j-1); g_color src (i-1) (j+1); g_color src i (j-1); g_color src i (j+1); g_color src (i+1) j; g_color src (i+1) (j-1); g_color src (i+1) (j+1)])
@@ -67,3 +68,14 @@ let blackAndWhite src dst =
                         done;
                 done
 
+let get_list src i j =
+  let (x,y) = Image_tools.get_dim src
+  and n = ref 0 in
+  let tab = Array.make 8 (-1,-1,-1) in
+  for a = i-1 to i+1 do
+    for b = j-1 to j+1 do
+      if (a >= 0 && a < x && b >= 0 && b < y && a != i && b != j) then
+        tab.(!n) <- g_color src a b;
+        n := !n +1;
+    done;
+  done
