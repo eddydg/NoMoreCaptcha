@@ -78,4 +78,5 @@ let get_list src i j =
         tab.(!n) <- g_color src a b;
         n := !n +1;
     done;
-  done
+  done;
+  tab
