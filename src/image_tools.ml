@@ -58,3 +58,23 @@ let apply_matrix src dst matrix bias =
       apply_matrix_px src dst i j matrix bias;
     done;
   done;;
+
+let print_matrix matrix w h =
+  for y=0 to h-1 do
+    Printf.printf "[";
+    for x=0 to w-1 do
+      Printf.printf "[%d]" matrix.(x).(y);
+    done;
+    Printf.printf "\n";
+  done;;
+
+
+let matrix2image matrix w h =
+  let pic = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
+  for y=0 to h-1 do
+    for x=0 to w-1 do
+      let color = matrix.(x).(y) in
+      Sdlvideo.put_pixel_color pic x y (color,color,color);
+    done;
+  done;
+  pic
