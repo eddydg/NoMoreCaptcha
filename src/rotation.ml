@@ -1,4 +1,5 @@
 let pi = 4. *. atan 1.
+let abs_f x = if (x < 0.) then (-1. *. x) else x
 
 (* Convert degrees to radian *)
 let deg2rad a =
@@ -48,22 +49,25 @@ let rotation image angle =
   done;
   new_surface
 
-(*
 
-  let detect_angle image = 
-    let (w, h) = get_dim image in
-    let detected_lines = Array.make_matrix 100 3 0 in
-    let i = 0 in
-    for y = 0 to h-1 do
-      for x = 0 to w-1 doux
-        let color = Sdlvideo.get_pixel_color image x y in
-        if color = (0,0,0) then
-          let theta = int_of_float (deg2rad (pi/2)) in
-            while theta < int_of_float (deg2rad (2*pi)) do
-              detected_lines.(i).(0) = detected_lines.(i).(0) + 1
-              detected_lines.(i).(1) = theta
-              detected_lines.(i).(2) = ro
-              incr i;
-            done;
-            for 
-          *)
+let get_hough_matrix image = 
+  let (w, h) = Image_tools.get_dim image in
+  let detected_lines = Array.make_matrix 360 (w+h) 0 in
+  for y = 0 to h-1 do
+    for x = 0 to w-1 do
+      let color = Sdlvideo.get_pixel_color image x y in
+      if color <> (255,255,255) then
+        for theta = 0 to 359 do
+          let theta_rad = deg2rad (float_of_int theta) in
+          let rho = (float_of_int x)*.(cos theta_rad) +.
+                    (float_of_int y)*.(sin theta_rad) in
+          let rho = int_of_float (abs_f rho) in
+          detected_lines.(theta).(rho) <- detected_lines.(theta).(rho) + 1;
+        done;
+        
+    done;
+  done;
+  detected_lines
+
+
+

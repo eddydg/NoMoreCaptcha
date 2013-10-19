@@ -58,3 +58,12 @@ let apply_matrix src dst matrix bias =
       apply_matrix_px src dst i j matrix bias;
     done;
   done;;
+
+let print_matrix matrix w h =
+  for y=0 to h-1 do
+    Printf.printf "[";
+    for x=0 to w-1 do
+      Printf.printf "[%d]" matrix.(x).(y);
+    done;
+    Printf.printf "\n";
+  done;
