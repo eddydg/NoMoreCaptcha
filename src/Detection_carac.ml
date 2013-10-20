@@ -44,7 +44,7 @@ let make_line dst y =
       compt := 0;
       for x=0 to w-1 do
         pixel := Sdlvideo.get_pixel_color dst x !yTemp;
-        if !pixel <= (150,150,150) then (****************** A MODIFIER MAUVAISE COULEUR *****************(=(0,0,0))*)
+        if !pixel = (0,0,0) then (****************** A MODIFIER MAUVAISE COULEUR *****************(=(0,0,0))*)
           compt := !compt + 1
       done;
       yTemp := !yTemp + 1;
@@ -65,7 +65,7 @@ let clear_line img ymin ymax =
     white := true;
     for y=ymin to ymax do
       pixel := Sdlvideo.get_pixel_color img x y;
-      white := !white && !pixel > (150,150,150); (*************************** A MODIFIER MAUVAISE COULEUR ***************************(0,0,0)*)
+      white := !white && !pixel > (0,0,0); (*************************** A MODIFIER MAUVAISE COULEUR ***************************(0,0,0)*)
     done;
     if !white then
       begin
@@ -111,7 +111,7 @@ let parcour_image img =
         begin
           for x=0 to w-1 do
             pixel := Sdlvideo.get_pixel_color img x y;
-            if !pixel <= (150,150,150) then (********************MAUVAISE VALEURS METTRE "=(0,0,0)"********************)
+            if !pixel = (0,0,0) then (********************MAUVAISE VALEURS METTRE "=(0,0,0)"********************)
               compt := !compt + 1;
           done;
           if !compt > 0 then
