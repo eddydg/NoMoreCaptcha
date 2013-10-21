@@ -62,7 +62,7 @@ let blackAndWhite src dst =
 		for i = 0 to x do
                         for j = 0 to y do
                         let a = level (Sdlvideo.get_pixel_color src i j) in
-                                if (a < (moyenne -. 95.)) then
+                                if (a < (moyenne -.0.)) then
                                         Sdlvideo.put_pixel_color dst i j (0, 0, 0)
                                 else
                                         Sdlvideo.put_pixel_color dst i j (255, 255, 255)
