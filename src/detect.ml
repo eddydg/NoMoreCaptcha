@@ -26,20 +26,20 @@ let line_this dst y =
   let pixel = ref (0,0,0) in
   let yTemp = ref 0 in
   let count = ref w in
-    for x=0 to w-1 do
+    for x=0 to w-2 do
       Sdlvideo.put_pixel_color dst x (y-1) red;
     done;
     yTemp := y;
     while !count > 0 do
       count := 0;
-      for x=0 to w-1 do
+      for x=0 to w-2 do
         pixel := Sdlvideo.get_pixel_color dst x !yTemp;
         if !pixel <= (150,150,150) then
           count := !count + 1
       done;
       yTemp := !yTemp + 1;
     done;
-    for x=0 to w-1 do
+    for x=0 to w-2 do
       Sdlvideo.put_pixel_color dst x (!yTemp-1) red
     done;
     !yTemp-y
@@ -50,7 +50,7 @@ let clear_this img ymin ymax =
   let white = ref true in
   let inCar = ref 0 in
   let trans = ref false in
-  for x=0 to w-1 do
+  for x=0 to w-2 do
     white := true;
     for y=ymin to ymax do
       pixel := Sdlvideo.get_pixel_color img x y;
@@ -87,17 +87,17 @@ let circle_this img =
   let line = ref false in
   let pixel = ref (0,0,0) in
   let ymin = ref 0 in
-    for y=0 to h-1 do
-      for x=0 to w-1 do
+    for y=0 to h-2 do
+      for x=0 to w-2 do
         pixel := Sdlvideo.get_pixel_color img x y;
         Sdlvideo.put_pixel_color img x y !pixel;
       done;
     done;
-    for y=0 to h-1 do
+    for y=0 to h-2 do
       count := 0;
       if not(!line) then
         begin
-          for x=0 to w-1 do
+          for x=0 to w-2 do
             pixel := Sdlvideo.get_pixel_color img x y;
             if !pixel <= (150,150,150) then
               count := !count + 1;
@@ -117,7 +117,7 @@ let circle_this img =
         end
     done;
     line := false;
-    for y=0 to h-1 do
+    for y=0 to h-2 do
       pixel := Sdlvideo.get_pixel_color img 0 y;
       if !pixel = (255,0,0) then
         begin
