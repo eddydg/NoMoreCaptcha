@@ -78,3 +78,17 @@ let matrix2image matrix w h =
     done;
   done;
   pic
+
+(* Show the segment between 2 point in red *)
+let print_segment image (x1,y1) (x2,y2) =
+  let (x1,x2) = if x1 > x2 then (x2,x1) else (x1,x2) in
+  let (y1,y2) = if y1 > y2 then (y2,y1) else (y1,y2) in
+
+  let pic = image in
+  let a = (y2-y1)/(x2-x1) in
+  let b = y1 - a*x1 in
+  for x = x1 to x2 do
+    let y = a*x + b in
+    Sdlvideo.put_pixel_color pic x y (255,0,0);
+  done;
+  pic
