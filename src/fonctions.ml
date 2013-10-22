@@ -1,4 +1,4 @@
-(*FILTRE GRIS*)
+(*GREY FILTER*)
 
 let level ((a:int),(b:int),(c:int)) =
         (0.3*.(float_of_int a) +. 0.59*.(float_of_int b) +. 0.11*.(float_of_int c))
@@ -17,8 +17,8 @@ let image2grey src dst =
 
 let g_color src i j = Sdlvideo.get_pixel_color src i j
 
-(*FILTRE NOIR ET BLANC*)
-let moyenne_couleur src =
+(*BLACK AND WHITE FILTER*)
+let average_color src =
 	let r =ref 0. in
 	let x,y,z = Sdlvideo.surface_dims src in
 	for i = 0 to (x-1) do
@@ -32,19 +32,18 @@ let moyenne_couleur src =
 
 let blackAndWhite src dst =
         let x,y,z = Sdlvideo.surface_dims src in
-	let moyenne = moyenne_couleur src in
-               (* Printf.printf "%d\n" (int_of_float moyenne);*)
+	let average = average_color src in
 		for i = 0 to (x-1) do
                         for j = 0 to (y-1) do
                         let a = level (Sdlvideo.get_pixel_color src i j) in
-                                if (a < (moyenne -. 40.)) then
+                                if (a < (average -. 90.)) then
                                         Sdlvideo.put_pixel_color dst i j (0, 0, 0)
                                 else
                                         Sdlvideo.put_pixel_color dst i j (255, 255, 255)
                         done;
                 done
 
-(*REDUCTION BRUIT*)
+(*NOISE REDUCTION*)
 let get_list src i j =
   let (x,y) = Image_tools.get_dim src
   and n = ref 0 in
