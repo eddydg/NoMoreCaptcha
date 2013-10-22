@@ -1,132 +1,121 @@
-(*1) initialize all weights and biases with random values between 0 and 1
-2) calculate the output of the network
-3) calculate the global error
-4) adjust the weights of the output neuron using the global error
-5) calculate the hidden neurons' errors (split the global error)
-6) adjust the hidden neurons' weights using their errors
-7) go to step 2) and repeat this until the error gets minimal (about 2000 loop for xor)*)
+let sigmoid x = 1. /. (1. +. exp (-1. *. x))
 
-let sigmoidOutput x = 1. /. (1. +. exp (-1.*.x))
+type initial = {
+iter : int;
+learnRate : float;
 
-let sigmoidDeriavtive x = x *. (1. -. x)
+mutable input1 : float;
+mutable input2 : float;
+mutable target : float;
 
-let toPositive x =
-	match x with
-	| x when x < 0. -> -1. *. x
-	| _ -> x
+(*The neural network variables (the neurons and the weights "biasweight"*)
+mutable hidden1 : float;
+mutable hidden2 : float;
+mutable output1 : float;
 
-class neuron =
-object
-	val mutable inputs = Array.make 2 0.;
-	val mutable weights = Array.make	2 0.;
-	val mutable error = 1.;
-	val mutable biasWeight = 0.;
+mutable weight_i1_h1 : float;
+mutable weight_i1_h2 : float;
+mutable weight_i2_h1 : float;
+mutable weight_i2_h2 : float;
+mutable weight_h1_o1 : float;
+mutable weight_h2_o1 : float}
 
-	method get_Output () =
-	sigmoidOutput (weights.(0) *. inputs.(0) +. weights.(1) *. inputs.(1) +. biasWeight)
+let create_init () =begin {
+	iter = 10000;
+	learnRate = 0.5;
 
-	method get_weight i = weights.(i)	
+	input1 = 0.;
+	input2 = 0.;
+	target = 0.;
 
-	method randomize_Weight () =
-	begin
-		weights.(0) <- Random.float 1.;
-		weights.(1) <- Random.float 1.;
-		biasWeight <- Random.float 1.;
-	end
+	(*The neural network variables (the neurons and the weights "biasweight"*)
+	hidden1 = Random.float 1.;
+	hidden2 = Random.float 1.;
+	output1 = Random.float 1.;
 
-	method adjust_Weight () = 
-	begin
-		weights.(0) <- weights.(0) +. error *. inputs.(0);
-		weights.(1) <- weights.(1) +. error *. inputs.(1);
-		biasWeight <- biasWeight +. error;
-	end
+	weight_i1_h1 = Random.float 1.;
+	weight_i1_h2 = Random.float 1.;
+	weight_i2_h1 = Random.float 1.;
+	weight_i2_h2 = Random.float 1.;
+	weight_h1_o1 = Random.float 1.;
+	weight_h2_o1 = Random.float 1.} end
 
-	method set_inputs a b=
-	begin
-		inputs.(0) <- a;
-		inputs.(1) <- b;
-	end
+let train (a:float) (b:float) (result:float) (w:initial)=
+begin
+	w.input1 <- a;
+	w.input2 <- b;
+	w.target <- result;
 
-	method set_error e = error <- e
-	method get_error () = error
+	let output_hidden1 = ref 0. in
+    let output_hidden2 = ref 0. in
+    let output_output1 = ref 0. in
+
+	(*Calculate the outputs*)
+    output_hidden1:= w.input1 *. w.weight_i1_h1 +. w.input2 *. w.weight_i2_h1 +. w.hidden1;
+    output_hidden1:=  sigmoid(!output_hidden1);
+
+    output_hidden2 := w.input1 *. w.weight_i1_h2 +. w.input2 *. w.weight_i2_h2 +. w.hidden2;
+    output_hidden2 := sigmoid(!output_hidden2);
+
+    output_output1:= !output_hidden1 *. w.weight_h1_o1 +. !output_hidden2 *. w.weight_h2_o1 +. w.output1;
+    output_output1 := sigmoid(!output_output1);
+
+    (*Calculate the error*)
+    let output1_adjustment = !output_output1 *. (1. -. !output_output1) *. (w.target -. !output_output1) in
+    let hidden2_adjustment = !output_hidden2 *. (1. -. !output_hidden2) *. output1_adjustment *. w.weight_h2_o1 in
+    let hidden1_adjustment = !output_hidden1 *. (1. -. !output_hidden1) *. output1_adjustment *. w.weight_h1_o1 in
+
+	(*Adjust the weights*)
+    w.weight_i1_h1 <- w.weight_i1_h1 +. w.learnRate *. hidden1_adjustment *. w.input1;
+    w.weight_i1_h2 <- w.weight_i1_h2 +. w.learnRate *. hidden2_adjustment *. w.input1;
+    w.weight_i2_h1 <- w.weight_i2_h1 +. w.learnRate *. hidden1_adjustment *. w.input2;
+    w.weight_i2_h2 <- w.weight_i2_h2 +. w.learnRate *. hidden2_adjustment *. w.input2;
+    w.weight_h1_o1 <- w.weight_h1_o1 +. w.learnRate *. output1_adjustment *. !output_hidden1; 
+    w.weight_h2_o1 <- w.weight_h2_o1 +. w.learnRate *. output1_adjustment *. !output_hidden2;     
+    w.hidden1 <- w.hidden1 +. w.learnRate *. hidden1_adjustment; 
+    w.hidden2 <- w.hidden2 +. w.learnRate *. hidden2_adjustment; 
+    w.output1 <- w.output1 +. w.learnRate *. output1_adjustment
 end
 
-let train () =
-begin
-	let inputs = Array.make_matrix	4 2 0. in
-	inputs.(0).(0) <- 0.; inputs.(0).(1) <- 0.;
-	inputs.(1).(0) <- 0.; inputs.(1).(1) <- 1.;
-	inputs.(2).(0) <- 1.; inputs.(2).(1) <- 0.;
-	inputs.(3).(0) <- 1.; inputs.(3).(1) <- 1.;
 
-	let results = Array.make 4 0. in
-	results.(0) <- 0.; results.(1) <- 1.; results.(2) <- 1.; results.(3) <- 0.;
+let run (a:float) (b:float) (w:initial)=
+begin
+	w.input1 <- a;	
+    w.input2<-  b;	
+
+    let output_hidden1 = ref 0. in
+    let output_hidden2 = ref 0. in
+    let output_output1 = ref 0. in
 	
-	(*creating new neurons*)
-	let hiddenNeuron1 = new neuron in
-	let hiddenNeuron2 = new neuron in
-	let outputNeuron = new neuron in	
+    (*Calculate the outputs, same code as the train function*)
+    output_hidden1:= w.input1 *. w.weight_i1_h1 +. w.input2 *. w.weight_i2_h1 +. w.hidden1;
+    output_hidden1:=  sigmoid(!output_hidden1);
 
-	(*initialize neurons' weight*)
-	hiddenNeuron1#randomize_Weight();
-	hiddenNeuron2#randomize_Weight();
-	outputNeuron#randomize_Weight();
+    output_hidden2 := w.input1 *. w.weight_i1_h2 +. w.input2 *. w.weight_i2_h2 +. w.hidden2;
+    output_hidden2 := sigmoid(!output_hidden2);
 
-	let count = ref 0 in
-	Printf.printf "%f\n" (outputNeuron#get_error());
-	while !count < 5000 do
-		for i = 0 to Array.length inputs -1 do
-			hiddenNeuron1#set_inputs inputs.(i).(0) inputs.(i).(1);
-			hiddenNeuron2#set_inputs inputs.(i).(0) inputs.(i).(1);
-
-			outputNeuron#set_inputs (hiddenNeuron1#get_Output()) (hiddenNeuron2#get_Output());
-
-			let out = outputNeuron#get_Output() in
-			(*Printf.printf "%f xor %f = %f\t\terr: %f\n" inputs.(i).(0) inputs.(i).(1) out (outputNeuron#get_error());*)
-			(*Printf.printf "out error : %f\n" (outputNeuron#get_error());*)
-			
-			outputNeuron#set_error ((sigmoidDeriavtive out) *. (results.(i) -. out));
-			outputNeuron#adjust_Weight();
-
-			hiddenNeuron1#set_error ((sigmoidDeriavtive (hiddenNeuron1#get_Output())) *. (outputNeuron#get_error()) *. (outputNeuron#get_weight 0));
-			hiddenNeuron2#set_error ((sigmoidDeriavtive (hiddenNeuron2#get_Output())) *. (outputNeuron#get_error()) *. (outputNeuron#get_weight 1));
-
-			hiddenNeuron1#adjust_Weight ();
-			hiddenNeuron2#adjust_Weight ();			
-		done;		
-		count := !count+1;
-	done;
-	Printf.printf "\ncount : %d\n" !count;
-	for i = 0 to Array.length inputs -1 do
-			hiddenNeuron1#set_inputs inputs.(i).(0) inputs.(i).(1);
-			hiddenNeuron2#set_inputs inputs.(i).(0) inputs.(i).(1);
-
-			outputNeuron#set_inputs (hiddenNeuron1#get_Output()) (hiddenNeuron2#get_Output());
-
-			let out = outputNeuron#get_Output() in
-			Printf.printf "%f xor %f = %f\t\terr: %f\n" inputs.(i).(0) inputs.(i).(1) out (outputNeuron#get_error());
-			(*Printf.printf "out error : %f\n" (outputNeuron#get_error());*)
-			
-			outputNeuron#set_error (sigmoidDeriavtive (out *. (results.(i) -. out)));
-			outputNeuron#adjust_Weight();
-
-			hiddenNeuron1#set_error ((sigmoidDeriavtive (hiddenNeuron1#get_Output())) *. (outputNeuron#get_error()) *. (outputNeuron#get_weight 0));
-			hiddenNeuron2#set_error ((sigmoidDeriavtive (hiddenNeuron2#get_Output())) *. (outputNeuron#get_error()) *. (outputNeuron#get_weight 1));
-
-			hiddenNeuron1#adjust_Weight ();
-			hiddenNeuron2#adjust_Weight ();			
-		done;
-
+    output_output1:= !output_hidden1 *. w.weight_h1_o1 +. !output_hidden2 *. w.weight_h2_o1 +. w.output1;
+    output_output1 := sigmoid(!output_output1);
+    
+    (*Show the result*)
+    Printf.printf "%d XOR %d = %f  =  " (int_of_float a) (int_of_float b) !output_output1;
+    Printf.printf "%d\n" (if !output_output1 >= 0.5 then 1 else 0);
 end
 
-
-(*
-let main () =
+let trainAndRun () =
 begin
-	Printf.printf "Start\n";
-	Random.self_init();
-	train();
-	Printf.printf "End\n";
+	Random.self_init ();
+	(*Train*)
+	let w = create_init() in
+    for i = 0 to w.iter do
+    	train 0. 0. 0. w;
+    	train 0. 1. 1. w ;
+    	train 1. 0. 1. w ;
+    	train 1. 1. 0. w ;
+    done;
+    (*Show results*)
+    run 0. 0. w ;
+	run 0. 1. w ;
+	run 1. 0. w ;
+	run 1. 1. w ;
 end
-
-let _ = main ()*)
