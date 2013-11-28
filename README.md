@@ -1,4 +1,4 @@
 NoMoreCaptcha
 =============
 
-OCR project in OCaml - Made by the UPPERCASE team
+O.C.R. project in OCaml - Made by the UPPERCASE team
