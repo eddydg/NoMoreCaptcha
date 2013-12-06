@@ -166,6 +166,7 @@ let bdetectAngle =
 		button#connect#clicked ~callback:detectAngle;
 		button
 
+
 let imageRotate () =
 	let pic = Sdlloader.load_image (!currentImg) in
 	let pic = Rotation.rotation pic (-10.) in
@@ -179,6 +180,32 @@ let bimageRotate =
 		~label: "Rotate"
 		~packing: toolbox#add () in
 		button#connect#clicked ~callback:imageRotate;
+		button
+
+
+let carDetection () = 
+	if not (!currentImg = "detect_output.bmp") then begin
+		let pic = Sdlloader.load_image(!currentImg) in
+		Detect.circle_this pic;
+		Sdlvideo.save_BMP pic "detect_output.bmp";
+		Sdl.quit ();
+		updateImage "detect_output.bmp"
+	end
+
+let bcarDetection =
+	let button = GButton.button
+		~label: "Detect"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:carDetection;
+		button
+
+let undo () = updateImage (getImage ())
+
+let bundo =
+	let button = GButton.button
+		~label: "Undo"
+		~packing: toolbar#add () in
+		button#connect#clicked ~callback:undo;
 		button
 
 (* ----------- END TOOLBAR ----------- *)
