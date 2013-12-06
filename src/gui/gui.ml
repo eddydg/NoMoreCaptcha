@@ -2,21 +2,20 @@ let _ = GMain.init ()
 
 let defaultPic = "text.bmp"
 
+
 let help_message () = print_endline "Coucou"
 
 let window = GWindow.window
 	~height: 500
 	~width: 700
 	~position: `CENTER
-	~title: "NoMoreCaptcha" ()
+	~title: "NoMoreCaptcha " ()
 
 let mainbox = GPack.vbox
 	~packing: window#add ()
 
 let box = GPack.vbox
 	~packing:mainbox#add ()
-
-
 
 
 (* ----------- MAIN BOXES ---------- *)	
@@ -42,7 +41,6 @@ let toolbox = GPack.hbox
 	~border_width: 10
 	~packing:mainbox#add ()
 
-
 let textarea =
   let scroll = GBin.scrolled_window
     ~hpolicy:`ALWAYS
@@ -52,8 +50,6 @@ let textarea =
   let txt = GText.view ~packing:scroll#add () in
   txt#misc#modify_font_by_name "Monospace 10";
   txt 
-
-
 
 
 (* ----------- FILE OPERATIONS -------- *)
@@ -76,7 +72,6 @@ let saveFileAs () =
 
 
 
-
 (* ---------- IMAGE OPERATIONS --------- *)
 
 let getImage () =
@@ -86,32 +81,14 @@ let getImage () =
     	Sys.argv.(1)
 
 let currentImg = ref (getImage ())
-
-
-let bopenImage = GFile.chooser_button
-	~action: `OPEN
-	~packing: toolbar#add ()
-
-let currentImage () = 
-	let title = "Information" in
-	match bopenImage#filename with 
-		| Some s -> GToolbox.message_box ~title s
-		| None -> GToolbox.message_box ~title "Pas d'image sélectionée."
-
-
-
-let bselectedImage = 
-	let button = GButton.button
-		~label: "Image sélectionnée"
-		~packing: toolbar#add () in
-		button#connect#clicked ~callback:currentImage;
-		button
+let currentAngle = ref 0
 
 
 let bSaveImage = 
 	let button = GButton.button
-		~stock: `SAVE 
+		~stock: `SAVE
 		~packing: toolbar#add () in
+		GMisc.image ~stock:`SAVE ~packing:button#set_image ();
 		button#connect#clicked ~callback:saveFileAs;
 		button
 
@@ -121,23 +98,121 @@ let showImage =
 		~packing: imagebox#add_with_viewport () in
 		image
 
+let updateImage img =
+	showImage#set_file img;
+	currentImg := img
+
+let setImage btn () =
+	Gaux.may showImage#set_file btn#filename;
+	match btn#filename with
+	| None -> ()
+	| Some pic -> currentImg := pic
+
+let bopenImage = 
+	let button = GFile.chooser_button
+		~title:"Select your image"
+		~action: `OPEN
+		~packing: toolbar#add () in
+		button#connect#selection_changed ~callback:(setImage button);
+		button
+
+let currentImage () = 
+	let title = "Information" in
+	match bopenImage#filename with 
+		| Some s -> GToolbox.message_box ~title s
+		| None -> GToolbox.message_box ~title "Pas d'image sélectionée."
+
+let bselectedImage = 
+	let button = GButton.button
+		~label: "Image sélectionnée"
+		~packing: toolbar#add () in
+		button#connect#clicked ~callback:currentImage;
+		button
+
+let bselectColor =
+	let dialog = GWindow.color_selection_dialog
+		~parent:window
+		~destroy_with_parent:true
+		~position:`CENTER_ON_PARENT () in
+
+		dialog#ok_button#connect#clicked (fun () ->
+			textarea#misc#modify_base [`NORMAL, `COLOR dialog#colorsel#color]
+		);
+		let button = GButton.button
+			~label:"Background color"
+			~packing:toolbox#add () in
+		GMisc.image ~stock:`COLOR_PICKER ~packing:button#set_image ();
+		button#connect#clicked (fun () ->
+			ignore (dialog#run ());
+			dialog#misc#hide ()
+		);
+		button
 
 
+(* ---------- PROCESSING --------- *)
+
+let detectAngle () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	let angle = Rotation.get_angle pic in
+	let title = "Angle detection" in
+	GToolbox.message_box ~title ("The picture is at "^
+								(string_of_float angle)^
+								" degrees.")
+
+let bdetectAngle =
+	let button = GButton.button
+		~label: "Detect Angle"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:detectAngle;
+		button
+
+let imageRotate () =
+	let pic = Sdlloader.load_image (!currentImg) in
+	let pic = Rotation.rotation pic (-10.) in
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+	(* Ajouter le filtre *)
+
+let bimageRotate =
+	let button = GButton.button
+		~label: "Rotate"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:imageRotate;
+		button
 
 (* ----------- END TOOLBAR ----------- *)
 
 let separator = GButton.separator_tool_item
 	~packing: toolbar#insert ()
 
+let bAboutUs =
+	let dialog = GWindow.about_dialog
+		~authors:["MeltedPenguin\nNicompleX\nJiiu\nGuerano"]
+		~copyright:"copyright @ 2013-2014"
+		~version:"v1."
+		~website:"http://nomorecaptcha.free.fr/"
+		~website_label:"NoMoreCaptcha"
+		~parent:window
+		~position:`CENTER_ON_PARENT
+		~destroy_with_parent:true () in
+	let button = GButton.button
+		~stock:`ABOUT
+		~packing:toolbar#add () in
+	GMisc.image ~stock:`ABOUT ~packing:button#set_image ();
+	button#connect#clicked (fun () ->
+		ignore (dialog#run ());
+		dialog#misc#hide ()
+	);
+	button
 
 let bquit = 
 	let button = GButton.button
 		~label: "Quit"
 		~packing: toolbar#add () in
+		GMisc.image ~stock:`QUIT ~packing:button#set_image ();
 		button#connect#clicked ~callback: GMain.quit;
 		button
-
-
 
 
 (* ---------- MAIN ------------ *)
