@@ -296,9 +296,9 @@ let seuilDetection adj () =
 
 
 let blackAndWhite spinner () = 
-	let threshold = 10 in
+	let threshold = (float_of_int spinner#value_as_int) in
 	let pic = Sdlloader.load_image(!currentImg) in
- 	Fonctions.blackAndWhite2 pic;
+ 	Fonctions.blackAndWhite2 pic ?vraiseuil:(Some threshold);
 	Sdlvideo.save_BMP pic "output.bmp";
 	Sdl.quit ();
 	updateImage "output.bmp"
