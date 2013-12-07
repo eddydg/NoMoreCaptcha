@@ -120,16 +120,16 @@ let currentImage () =
 	let title = "Information" in
 	match bopenImage#filename with 
 		| Some s -> GToolbox.message_box ~title s
-		| None -> GToolbox.message_box ~title "Pas d'image sélectionée."
+		| None -> GToolbox.message_box ~title "No new image."
 
 let bselectedImage = 
 	let button = GButton.button
-		~label: "Image sélectionnée"
+		~label: "Current Image"
 		~packing: toolbar#add () in
 		button#connect#clicked ~callback:currentImage;
 		button
 
-let bselectColor =
+(* let bselectColor =
 	let dialog = GWindow.color_selection_dialog
 		~parent:window
 		~destroy_with_parent:true
@@ -146,18 +146,20 @@ let bselectColor =
 			ignore (dialog#run ());
 			dialog#misc#hide ()
 		);
-		button
+		button *)
 
 
 (* ---------- PROCESSING --------- *)
 
+let detectedAngle = ref 0.
+
 let detectAngle () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	let angle = Rotation.get_angle pic in
-	let title = "Angle detection" in
-	GToolbox.message_box ~title ("The picture is at "^
-								(string_of_float angle)^
-								" degrees.")
+	let title = "Angle Detection" in
+	GToolbox.message_box
+		~title ("The picture is at "^(string_of_float angle)^" degrees.");
+	detectedAngle := angle
 
 let bdetectAngle =
 	let button = GButton.button
@@ -166,22 +168,166 @@ let bdetectAngle =
 		button#connect#clicked ~callback:detectAngle;
 		button
 
-let imageRotate () =
+
+(* ---------- ROTATION ------------*)
+
+let setRotate spinner () = 
+	detectedAngle := (float_of_int spinner#value_as_int);
 	let pic = Sdlloader.load_image (!currentImg) in
-	let pic = Rotation.rotation pic (-10.) in
+	let pic = Rotation.rotation pic (-1.*.(!detectedAngle)) in
 	Sdlvideo.save_BMP pic "output.bmp";
 	Sdl.quit ();
 	updateImage "output.bmp"
-	(* Ajouter le filtre *)
+
+let wimageRotate () =
+	let dialog = GWindow.dialog
+		~parent:window
+		~title:"Rotation"
+		~height:140
+		~width:200 () in
+	let label = GMisc.label ~text:"Rotating at: " ~packing:dialog#vbox#add () in
+	let adj = GData.adjustment
+		~value:(!detectedAngle)
+		~lower:0.0
+		~upper:90.0
+		~step_incr:1.0
+		~page_incr:1.0
+		~page_size:0.0 () in
+	let spinner = GEdit.spin_button
+		~adjustment:adj
+		~rate:1.0
+		~digits:2
+		~width:100
+		~packing:dialog#vbox#add () in
+	let ok = GButton.button
+		~label:"Barrel Roll!"
+		~packing:dialog#vbox#add () in
+	let cancel = GButton.button
+		~label:"Quit"
+		~packing:dialog#vbox#add () in
+	cancel#connect#clicked ~callback:(dialog#misc#hide);
+	ok#connect#clicked ~callback:(setRotate spinner);
+	ignore (dialog#run ());
+	dialog#misc#hide ()
 
 let bimageRotate =
 	let button = GButton.button
 		~label: "Rotate"
 		~packing: toolbox#add () in
-		button#connect#clicked ~callback:imageRotate;
+		button#connect#clicked ~callback:wimageRotate;
 		button
 
-(* ----------- END TOOLBAR ----------- *)
+
+(* ----------- FILTERS -----------*)
+
+let noNoiseAverage threshold () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	Fonctions.noNoise_average pic;
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+let noNoiseMedian threshold () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	Fonctions.noNoise_median pic;
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+let noNoise spinner isAverage =
+	let step = spinner#value_as_int in
+	if isAverage then
+		noNoiseAverage step
+	else
+		noNoiseMedian step
+
+
+let wnoNoise () =
+	let dialog = GWindow.dialog
+		~parent:window
+		~title:"Go away noise!"
+		~height:160
+		~width:200 () in
+	let label = GMisc.label ~text:"Noise removing threshold: " ~packing:dialog#vbox#add () in
+	let adj = GData.adjustment
+		~value:0.0
+		~lower:0.0
+		~upper:10.0
+		~step_incr:1.0
+		~page_incr:1.0
+		~page_size:0.0 () in
+	let spinner = GEdit.spin_button
+		~adjustment:adj
+		~rate:1.0
+		~digits:2
+		~width:100
+		~packing:dialog#vbox#add () in
+	let box = GPack.hbox
+		~spacing:10
+		~border_width:10
+		~packing:dialog#vbox#add () in
+	let bAverage = GButton.button
+		~label:"Average"
+		~packing:dialog#vbox#add () in
+	let bMedian = GButton.button
+		~label:"Median"
+		~packing:dialog#vbox#add () in
+	let cancel = GButton.button
+		~label:"Quit"
+		~packing:dialog#vbox#add () in
+	cancel#connect#clicked ~callback:(dialog#misc#hide);
+	bAverage#connect#clicked ~callback:(noNoise spinner true);
+	bMedian#connect#clicked ~callback:(noNoise spinner false);
+	ignore (dialog#run ());
+	dialog#misc#hide ()
+
+let bnoNoise =
+	let button = GButton.button
+	~label: "Noise Remove"
+	~packing: toolbox#add () in
+	button#connect#clicked ~callback:wnoNoise;
+	button
+
+
+(* ---------- DETECTION ----------- *)
+
+let carDetection () = 
+	let pic = Sdlloader.load_image(!currentImg) in
+	Detect.circle_this pic;
+	Sdlvideo.save_BMP pic "detect_output.bmp";
+	Sdl.quit ();
+	showImage#set_file "detect_output.bmp"
+
+let bcarDetection =
+	let button = GButton.button
+		~label: "Detect"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:carDetection;
+		button
+
+let carRecognition () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	let text = "(FIX ME)" in
+	set_text text ()
+
+let bcarRecognition =
+	let button = GButton.button
+		~label:"Convert to text"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:carRecognition;
+		button
+
+
+(* ----------- MISC ----------- *)
+
+let undo () = updateImage (getImage ())
+
+let bundo =
+	let button = GButton.button
+		~label: "Undo"
+		~packing: toolbar#add () in
+		button#connect#clicked ~callback:undo;
+		button
 
 let separator = GButton.separator_tool_item
 	~packing: toolbar#insert ()
@@ -219,6 +365,6 @@ let bquit =
 
 let _ =
 	window#connect#destroy
-		~callback: GMain.quit;
+		~callback: (GMain.quit);
 	window#show ();
 	GMain.main ()
