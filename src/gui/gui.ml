@@ -120,16 +120,16 @@ let currentImage () =
 	let title = "Information" in
 	match bopenImage#filename with 
 		| Some s -> GToolbox.message_box ~title s
-		| None -> GToolbox.message_box ~title "Pas d'image sélectionée."
+		| None -> GToolbox.message_box ~title "No new image."
 
 let bselectedImage = 
 	let button = GButton.button
-		~label: "Image sélectionnée"
+		~label: "Current Image"
 		~packing: toolbar#add () in
 		button#connect#clicked ~callback:currentImage;
 		button
 
-let bselectColor =
+(* let bselectColor =
 	let dialog = GWindow.color_selection_dialog
 		~parent:window
 		~destroy_with_parent:true
@@ -146,7 +146,7 @@ let bselectColor =
 			ignore (dialog#run ());
 			dialog#misc#hide ()
 		);
-		button
+		button *)
 
 
 (* ---------- PROCESSING --------- *)
@@ -179,7 +179,6 @@ let setRotate spinner () =
 	Sdl.quit ();
 	updateImage "output.bmp"
 
-
 let wimageRotate () =
 	let dialog = GWindow.dialog
 		~parent:window
@@ -210,8 +209,6 @@ let wimageRotate () =
 	ok#connect#clicked ~callback:(setRotate spinner);
 	ignore (dialog#run ());
 	dialog#misc#hide ()
-	
-
 
 let bimageRotate =
 	let button = GButton.button
@@ -220,7 +217,7 @@ let bimageRotate =
 		button#connect#clicked ~callback:wimageRotate;
 		button
 
-
+(* ---------- DETECTION ----------- *)
 
 let carDetection () = 
 	let pic = Sdlloader.load_image(!currentImg) in
@@ -236,6 +233,80 @@ let bcarDetection =
 		button#connect#clicked ~callback:carDetection;
 		button
 
+(* ----------- FILTERS -----------*)
+
+let noNoiseAverage threshold () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	Fonctions.noNoise_average pic;
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+let noNoiseMedian threshold () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	Fonctions.noNoise_median pic;
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+let noNoise spinner isAverage =
+	let step = spinner#value_as_int in
+	if isAverage then
+		noNoiseAverage step
+	else
+		noNoiseMedian step
+
+
+let wnoNoise () =
+	let dialog = GWindow.dialog
+		~parent:window
+		~title:"Go away noise!"
+		~height:160
+		~width:200 () in
+	let label = GMisc.label ~text:"Noise removing threshold: " ~packing:dialog#vbox#add () in
+	let adj = GData.adjustment
+		~value:0.0
+		~lower:0.0
+		~upper:10.0
+		~step_incr:1.0
+		~page_incr:1.0
+		~page_size:0.0 () in
+	let spinner = GEdit.spin_button
+		~adjustment:adj
+		~rate:1.0
+		~digits:2
+		~width:100
+		~packing:dialog#vbox#add () in
+	let box = GPack.hbox
+		~spacing:10
+		~border_width:10
+		~packing:dialog#vbox#add () in
+	let bAverage = GButton.button
+		~label:"Average"
+		~packing:dialog#vbox#add () in
+	let bMedian = GButton.button
+		~label:"Median"
+		~packing:dialog#vbox#add () in
+	let cancel = GButton.button
+		~label:"Quit"
+		~packing:dialog#vbox#add () in
+	cancel#connect#clicked ~callback:(dialog#misc#hide);
+	bAverage#connect#clicked ~callback:(noNoise spinner true);
+	bMedian#connect#clicked ~callback:(noNoise spinner false);
+	ignore (dialog#run ());
+	dialog#misc#hide ()
+
+let bnoNoise =
+	let button = GButton.button
+	~label: "Noise Remove"
+	~packing: toolbox#add () in
+	button#connect#clicked ~callback:wnoNoise;
+	button
+
+
+
+(* ----------- MISC ----------- *)
+
 let undo () = updateImage (getImage ())
 
 let bundo =
@@ -244,8 +315,6 @@ let bundo =
 		~packing: toolbar#add () in
 		button#connect#clicked ~callback:undo;
 		button
-
-(* ----------- END TOOLBAR ----------- *)
 
 let separator = GButton.separator_tool_item
 	~packing: toolbar#insert ()
@@ -283,6 +352,6 @@ let bquit =
 
 let _ =
 	window#connect#destroy
-		~callback: GMain.quit;
+		~callback: (GMain.quit);
 	window#show ();
 	GMain.main ()
