@@ -106,8 +106,8 @@ let noNoise_median src dst =
 
 let noNoise_average src dst =
   let (w,h) = Image_tools.get_dim src in
-    for i = 1 to (w-1) do
-      for j = 1 to (h-1) do
+    for i = 0 to (w-1) do
+      for j = 0 to (h-1) do
 	Sdlvideo.put_pixel_color dst i j (average_px (get_list src i j));
       done;
     done
