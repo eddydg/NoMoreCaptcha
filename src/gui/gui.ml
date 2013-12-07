@@ -217,21 +217,6 @@ let bimageRotate =
 		button#connect#clicked ~callback:wimageRotate;
 		button
 
-(* ---------- DETECTION ----------- *)
-
-let carDetection () = 
-	let pic = Sdlloader.load_image(!currentImg) in
-	Detect.circle_this pic;
-	Sdlvideo.save_BMP pic "detect_output.bmp";
-	Sdl.quit ();
-	showImage#set_file "detect_output.bmp"
-
-let bcarDetection =
-	let button = GButton.button
-		~label: "Detect"
-		~packing: toolbox#add () in
-		button#connect#clicked ~callback:carDetection;
-		button
 
 (* ----------- FILTERS -----------*)
 
@@ -303,6 +288,34 @@ let bnoNoise =
 	button#connect#clicked ~callback:wnoNoise;
 	button
 
+
+(* ---------- DETECTION ----------- *)
+
+let carDetection () = 
+	let pic = Sdlloader.load_image(!currentImg) in
+	Detect.circle_this pic;
+	Sdlvideo.save_BMP pic "detect_output.bmp";
+	Sdl.quit ();
+	showImage#set_file "detect_output.bmp"
+
+let bcarDetection =
+	let button = GButton.button
+		~label: "Detect"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:carDetection;
+		button
+
+let carRecognition () =
+	let pic = Sdlloader.load_image(!currentImg) in
+	let text = "(FIX ME)" in
+	set_text text ()
+
+let bcarRecognition =
+	let button = GButton.button
+		~label:"Convert to text"
+		~packing: toolbox#add () in
+		button#connect#clicked ~callback:carRecognition;
+		button
 
 
 (* ----------- MISC ----------- *)
