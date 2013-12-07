@@ -1,6 +1,6 @@
 let _ = GMain.init ()
 
-let defaultPic = "text.bmp"
+let defaultPic = ref "text.bmp"
 
 
 let help_message () = print_endline "Coucou"
@@ -106,7 +106,7 @@ let setImage btn () =
 	Gaux.may showImage#set_file btn#filename;
 	match btn#filename with
 	| None -> ()
-	| Some pic -> currentImg := pic
+	| Some pic -> currentImg := pic; defaultPic := pic
 
 let bopenImage = 
 	let button = GFile.chooser_button
@@ -289,6 +289,62 @@ let bnoNoise =
 	button
 
 
+let seuilDetection adj () =
+	let pic = Sdlloader.load_image (!currentImg) in
+	let seuil = Fonctions.seuil pic in
+	adj#set_value (float_of_int seuil)
+
+
+let blackAndWhite spinner () = 
+	let threshold = 10 in
+	let pic = Sdlloader.load_image(!currentImg) in
+ 	Fonctions.blackAndWhite2 pic;
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+let wblackAndWhite () =
+	let dialog = GWindow.dialog
+		~parent:window
+		~title:"BlackAndWhite"
+		~height:160
+		~width:200 () in
+	let label = GMisc.label ~text:"Black and White threshold: " ~packing:dialog#vbox#add () in
+	let adj = GData.adjustment
+		~value:0.0
+		~lower:0.0
+		~upper:255.0
+		~step_incr:1.0
+		~page_incr:1.0
+		~page_size:0.0 () in
+	let spinner = GEdit.spin_button
+		~adjustment:adj
+		~rate:1.0
+		~digits:3
+		~width:100
+		~packing:dialog#vbox#add () in
+	let ok = GButton.button
+		~label:"Apply"
+		~packing:dialog#vbox#add () in
+	let auto = GButton.button
+		~label:"Auto"
+		~packing:dialog#vbox#add () in
+	let cancel = GButton.button
+		~label:"Quit"
+		~packing:dialog#vbox#add () in
+	cancel#connect#clicked ~callback:(dialog#misc#hide);
+	ok#connect#clicked ~callback:(blackAndWhite spinner);
+	auto#connect#clicked ~callback:(seuilDetection adj);
+	ignore (dialog#run ());
+	dialog#misc#hide ()
+
+let bblackAndWhite =
+	let button = GButton.button
+	~label: "Black And White"
+	~packing: toolbox#add () in
+	button#connect#clicked ~callback:(wblackAndWhite)
+
+
 (* ---------- DETECTION ----------- *)
 
 let carDetection () = 
@@ -305,6 +361,7 @@ let bcarDetection =
 		button#connect#clicked ~callback:carDetection;
 		button
 
+
 let carRecognition () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	let text = "(FIX ME)" in
@@ -320,7 +377,7 @@ let bcarRecognition =
 
 (* ----------- MISC ----------- *)
 
-let undo () = updateImage (getImage ())
+let undo () = updateImage (!defaultPic)
 
 let bundo =
 	let button = GButton.button
