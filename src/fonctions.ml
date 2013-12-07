@@ -33,10 +33,11 @@ let average_color src =
 let blackAndWhite src dst =
         let x,y,z = Sdlvideo.surface_dims src in
 	let average = average_color src in
+	Printf.printf "Moyenne : %f\n" (average);
 		for i = 0 to (x-1) do
                         for j = 0 to (y-1) do
                         let a = level (Sdlvideo.get_pixel_color src i j) in
-                                if (a < (average -. 90.)) then
+                                if (a < (average)) then
                                         Sdlvideo.put_pixel_color dst i j (0, 0, 0)
                                 else
                                         Sdlvideo.put_pixel_color dst i j (255, 255, 255)
@@ -97,8 +98,8 @@ let median_px tab =
 
 let noNoise_median src dst =
   let (w,h) = Image_tools.get_dim src in
-    for i = 1 to (w-1) do
-      for j = 1 to (h-1) do
+    for i = 0 to (w-1) do
+      for j = 0 to (h-1) do
         Sdlvideo.put_pixel_color dst i j (median_px (get_list src i j));
       done;
     done
@@ -106,8 +107,43 @@ let noNoise_median src dst =
 
 let noNoise_average src dst =
   let (w,h) = Image_tools.get_dim src in
-    for i = 1 to (w-1) do
-      for j = 1 to (h-1) do
+    for i = 0 to (w-1) do
+      for j = 0 to (h-1) do
 	Sdlvideo.put_pixel_color dst i j (average_px (get_list src i j));
       done;
     done
+
+(* TEST SEUILLAGE INTELLIGENT*)
+let seuil src =
+  let nb_px = ref 0 in
+  let accu = ref 0 in
+  let (w,h) = Image_tools.get_dim src in
+  for i = 0 to (w-1) do
+    for j = 0 to (h-1) do
+      if (level (g_color src i j) < 220.) then
+	begin
+	accu := !accu + int_of_float(level(g_color src i j));
+	nb_px := !nb_px + 1;
+	end
+    done;
+  done;
+  Printf.printf "Nb_px : %d\n" !nb_px;
+  (!accu / !nb_px)
+
+let blackAndWhite2 src ?vraiseuil dst =
+	let seuil_img = match vraiseuil with
+	  Some x -> x
+	  |None -> float_of_int(seuil src)
+	in
+        let x,y,z = Sdlvideo.surface_dims src in
+       	Printf.printf "Seuil : %f\n" (seuil_img +. 5.);
+                for i = 0 to (x-1) do
+                        for j = 0 to (y-1) do
+                        let a = level (Sdlvideo.get_pixel_color src i j) in
+                                if (a > seuil_img) then
+                                        Sdlvideo.put_pixel_color dst i j (255,255,255)
+                                else
+                                        Sdlvideo.put_pixel_color dst i j (0, 0, 0)
+                        done;
+                done
+
