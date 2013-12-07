@@ -1,27 +1,5 @@
-let get_dims img =
-  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
- 
-let sdl_init () =
-  begin
-    Sdl.init [`EVERYTHING];
-    Sdlevent.enable_events Sdlevent.all_events_mask;
-  end
- 
-let rec wait_key () =
-  let e = Sdlevent.wait_event () in
-    match e with
-    Sdlevent.KEYDOWN _ -> ()
-      | _ -> wait_key ()
-
-
-let show img dst =
-  let d = Sdlvideo.display_format img in
-    Sdlvideo.blit_surface d dst ();
-    Sdlvideo.flip dst
-
-
 let line_this dst y =
-  let (w,h) = get_dims dst in
+  let (w,h) = Image_tools.get_dim dst in
   let red = (255, 0, 0) in
   let pixel = ref (0,0,0) in
   let yTemp = ref 0 in
@@ -47,11 +25,10 @@ let line_this dst y =
     !yTemp-y
 
 let clear_this img ymin ymax =
-  let (w,h) = get_dims img in
+  let (w,h) = Image_tools.get_dim img in
   let pixel = ref (0,0,0) in
   let white = ref true in
   let inCar = ref 0 in
-  let count = ref 0 in 
   let trans = ref false in
 if abs(ymax-ymin) > 5 then
  begin
@@ -93,7 +70,7 @@ else
 
 
 let circle_this img =
-  let (w,h) = get_dims img in
+  let (w,h) = Image_tools.get_dim img in
   let count = ref 0 in
   let tempo = ref 0 in
   let line = ref false in
@@ -146,22 +123,3 @@ let circle_this img =
         end
     done;
     ()
-
-let main () = 
-    begin
-      if Array.length (Sys.argv) < 2 then
-      failwith "Need a pic";
-      sdl_init ();
-    let pic = Sdlloader.load_image Sys.argv.(1) in
-    let (w,h) = get_dims pic in
-    (*let surf =  Sdlvideo.create_RGB_surface_format (Rotation.rotation pic 3.) [] x y  in*)
-    let surface = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
-    show pic surface;
-    wait_key();
-    circle_this pic;
-    show pic surface;
-    wait_key ();
-    exit 0
-    end
-
-let _ = main ()
