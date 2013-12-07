@@ -157,11 +157,8 @@ let detectAngle () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	let angle = Rotation.get_angle pic in
 	let title = "Angle Detection" in
-	GToolbox.message_box ~title (
-		"The picture is at "^
-		(string_of_float angle)^
-		" degrees."
-	);
+	GToolbox.message_box
+		~title ("The picture is at "^(string_of_float angle)^" degrees.");
 	detectedAngle := angle
 
 let bdetectAngle =
@@ -172,28 +169,57 @@ let bdetectAngle =
 		button
 
 
-let imageRotate () =
-	let title = "Rotation" in
-	let ok = "Rotate" in
-	let text = (string_of_float !detectedAngle) in
-	let box = GToolbox.input_string ~title ~text ~ok "" in
-	match box with
-	| None -> ()
-	| Some a -> begin
-		let pic = Sdlloader.load_image (!currentImg) in
-		let pic = Rotation.rotation pic (-1.*.(float_of_string a)) in
-		Sdlvideo.save_BMP pic "output.bmp";
-		Sdl.quit ();
-		updateImage "output.bmp"
-	end
-	(* Ajouter le filtre *)
+(* ---------- ROTATION ------------*)
+
+let setRotate spinner () = 
+	detectedAngle := (float_of_int spinner#value_as_int);
+	let pic = Sdlloader.load_image (!currentImg) in
+	let pic = Rotation.rotation pic (-1.*.(!detectedAngle)) in
+	Sdlvideo.save_BMP pic "output.bmp";
+	Sdl.quit ();
+	updateImage "output.bmp"
+
+
+let wimageRotate () =
+	let dialog = GWindow.dialog
+		~parent:window
+		~title:"Rotation"
+		~height:140
+		~width:200 () in
+	let label = GMisc.label ~text:"Rotating at: " ~packing:dialog#vbox#add () in
+	let adj = GData.adjustment
+		~value:(!detectedAngle)
+		~lower:0.0
+		~upper:90.0
+		~step_incr:1.0
+		~page_incr:1.0
+		~page_size:0.0 () in
+	let spinner = GEdit.spin_button
+		~adjustment:adj
+		~rate:1.0
+		~digits:2
+		~width:100
+		~packing:dialog#vbox#add () in
+	let ok = GButton.button
+		~label:"Barrel Roll!"
+		~packing:dialog#vbox#add () in
+	let cancel = GButton.button
+		~label:"Quit"
+		~packing:dialog#vbox#add () in
+	cancel#connect#clicked ~callback:(dialog#misc#hide);
+	ok#connect#clicked ~callback:(setRotate spinner);
+	ignore (dialog#run ());
+	dialog#misc#hide ()
+	
+
 
 let bimageRotate =
 	let button = GButton.button
 		~label: "Rotate"
 		~packing: toolbox#add () in
-		button#connect#clicked ~callback:imageRotate;
+		button#connect#clicked ~callback:wimageRotate;
 		button
+
 
 
 let carDetection () = 
