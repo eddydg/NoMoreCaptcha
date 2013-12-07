@@ -151,13 +151,18 @@ let bselectColor =
 
 (* ---------- PROCESSING --------- *)
 
+let detectedAngle = ref 0.
+
 let detectAngle () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	let angle = Rotation.get_angle pic in
-	let title = "Angle detection" in
-	GToolbox.message_box ~title ("The picture is at "^
-								(string_of_float angle)^
-								" degrees.")
+	let title = "Angle Detection" in
+	GToolbox.message_box ~title (
+		"The picture is at "^
+		(string_of_float angle)^
+		" degrees."
+	);
+	detectedAngle := angle
 
 let bdetectAngle =
 	let button = GButton.button
@@ -168,11 +173,19 @@ let bdetectAngle =
 
 
 let imageRotate () =
-	let pic = Sdlloader.load_image (!currentImg) in
-	let pic = Rotation.rotation pic (-10.) in
-	Sdlvideo.save_BMP pic "output.bmp";
-	Sdl.quit ();
-	updateImage "output.bmp"
+	let title = "Rotation" in
+	let ok = "Rotate" in
+	let text = (string_of_float !detectedAngle) in
+	let box = GToolbox.input_string ~title ~text ~ok "" in
+	match box with
+	| None -> ()
+	| Some a -> begin
+		let pic = Sdlloader.load_image (!currentImg) in
+		let pic = Rotation.rotation pic (-1.*.(float_of_string a)) in
+		Sdlvideo.save_BMP pic "output.bmp";
+		Sdl.quit ();
+		updateImage "output.bmp"
+	end
 	(* Ajouter le filtre *)
 
 let bimageRotate =
@@ -184,13 +197,11 @@ let bimageRotate =
 
 
 let carDetection () = 
-	if not (!currentImg = "detect_output.bmp") then begin
-		let pic = Sdlloader.load_image(!currentImg) in
-		Detect.circle_this pic;
-		Sdlvideo.save_BMP pic "detect_output.bmp";
-		Sdl.quit ();
-		updateImage "detect_output.bmp"
-	end
+	let pic = Sdlloader.load_image(!currentImg) in
+	Detect.circle_this pic;
+	Sdlvideo.save_BMP pic "detect_output.bmp";
+	Sdl.quit ();
+	showImage#set_file "detect_output.bmp"
 
 let bcarDetection =
 	let button = GButton.button
