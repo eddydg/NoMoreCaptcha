@@ -215,7 +215,7 @@ let wimageRotate () =
 		~width:100
 		~packing:dialog#vbox#add () in
 	let ok = GButton.button
-		~label:"Barrel Roll!"
+		~label:"Rotate"
 		~packing:dialog#vbox#add () in
 	let cancel = GButton.button
 		~label:"Quit"
@@ -235,14 +235,14 @@ let bimageRotate =
 
 (* ----------- FILTERS -----------*)
 
-let noNoiseAverage threshold () =
+let noNoiseAverage () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	Fonctions.noNoise_average pic;
 	Sdlvideo.save_BMP pic "output.bmp";
 	Sdl.quit ();
 	updateImage "output.bmp"
 
-let noNoiseMedian threshold () =
+(* let noNoiseMedian threshold () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	Fonctions.noNoise_median pic;
 	Sdlvideo.save_BMP pic "output.bmp";
@@ -284,7 +284,7 @@ let wnoNoise () =
 	let bAverage = GButton.button
 		~label:"Average"
 		~packing:dialog#vbox#add () in
-	let bMedian = GButton.button
+ 	let bMedian = GButton.button
 		~label:"Median"
 		~packing:dialog#vbox#add () in
 	let cancel = GButton.button
@@ -295,12 +295,13 @@ let wnoNoise () =
 	bMedian#connect#clicked ~callback:(noNoise spinner false);
 	ignore (dialog#run ());
 	dialog#misc#hide ()
+*)
 
 let bnoNoise =
 	let button = GButton.button
 	~label: "Noise Remove"
 	~packing: toolbox#add () in
-	button#connect#clicked ~callback:wnoNoise;
+	button#connect#clicked ~callback:noNoiseAverage;
 	button
 
 
