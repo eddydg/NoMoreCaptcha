@@ -26,10 +26,6 @@ let line_this dst y =
   let pixel = ref (0,0,0) in
   let yTemp = ref 0 in
   let count = ref w in
-    for x=0 to w-1 do
-	if Sdlvideo.get_pixel_color dst x (y-1) > (150,150,150) then
-      	Sdlvideo.put_pixel_color dst x (y-1) red
-    done;
     yTemp := y;
     while !count > 5 do
       count := 0;
@@ -40,8 +36,11 @@ let line_this dst y =
       done;
       yTemp := !yTemp + 1;
     done;
+    if (!yTemp - y) > 5 then 
     for x=0 to w-1 do
-	if Sdlvideo.get_pixel_color dst x (!yTemp-1) > (150,150,150) then
+      if Sdlvideo.get_pixel_color dst x (y-1) > (150,150,150) then
+        Sdlvideo.put_pixel_color dst x (y-1) red;
+	    if Sdlvideo.get_pixel_color dst x (!yTemp-1) > (150,150,150)then
      	  Sdlvideo.put_pixel_color dst x (!yTemp-1) red
     done;
     !yTemp-y
@@ -51,46 +50,37 @@ let clear_this img ymin ymax =
   let pixel = ref (0,0,0) in
   let white = ref true in
   let inCar = ref 0 in
-  let count = ref 0 in 
   let trans = ref false in
-if abs(ymax-ymin) > 5 then
- begin
   for x=0 to w-1 do
     white := true;
-    for y=ymin to ymax do
+    for y=(ymin+1) to (ymax-1) do
       pixel := Sdlvideo.get_pixel_color img x y;
       white := !white && !pixel > (150,150,150);
     done;
     if !white then
       begin
-        if !inCar <> 0 then
+        if !inCar > 1 then
           trans := true;
-        inCar := 0; 
-        Sdlvideo.put_pixel_color img x ymin (255,255,255);
-        Sdlvideo.put_pixel_color img x ymax (255,255,255);
+        inCar := 0;
+        Sdlvideo.put_pixel_color img x ymin (255,255,255);     
+        Sdlvideo.put_pixel_color img x ymax (255,255,255)         
       end
     else
       inCar := !inCar + 1;
     if !trans then
       begin
         for y=ymin to ymax do
-          Sdlvideo.put_pixel_color img x y (255,0,0);
+          Sdlvideo.put_pixel_color img x y (255,0,0)
         done;
-        trans := false;
+        trans := false
       end;
-    if !inCar = 1 then
+    if !inCar = 2 then
       for y=ymin to ymax do
-        Sdlvideo.put_pixel_color img (x-1) y (255,0,0);
+        Sdlvideo.put_pixel_color img (x-2) y (255,0,0);
       done;
   done;
- end
-else
-  for x = 0 to w-1 do
-	Sdlvideo.put_pixel_color img x ymin (255,255,255);
-	Sdlvideo.put_pixel_color img x ymax (255,255,255)
-  done;
- ()
-
+  ()
+ 
 
 let circle_this img =
   let (w,h) = get_dims img in
@@ -99,12 +89,6 @@ let circle_this img =
   let line = ref false in
   let pixel = ref (0,0,0) in
   let ymin = ref 0 in
-    for y=0 to h-1 do
-      for x=0 to w-1 do
-        pixel := Sdlvideo.get_pixel_color img x y;
-        Sdlvideo.put_pixel_color img x y !pixel;
-      done;
-    done;
     for y=0 to h-1 do
       count := 0;
       if not(!line) then
@@ -120,7 +104,7 @@ let circle_this img =
               line := true
             end
         end
-      else
+        else
         begin
           if (!tempo <= 0) then
             line := false
@@ -147,7 +131,7 @@ let circle_this img =
     done;
     ()
 
-let main () = 
+(*let main () = 
     begin
       if Array.length (Sys.argv) < 2 then
       failwith "Need a pic";
@@ -164,4 +148,4 @@ let main () =
     exit 0
     end
 
-let _ = main ()
+let _ = main ()*)
