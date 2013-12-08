@@ -50,11 +50,12 @@ let blackAndWhite src =
 
 (*NOISE REDUCTION*)
 let get_list src i j =
+  let (x,y,_) = Sdlvideo.surface_dims src in
   let tab = Array.make 8 (-1,-1,-1) in
-	if(i-1 >= 0 && j >= 0) then tab.(1) <- g_color src (i-1) j;
-	if(i-1 >= 0 && j >= 0) then tab.(2) <- g_color src i (j-1);
-	if(i-1 >= 0 && j >= 0) then tab.(3) <- g_color src i (j+1);
-	if(i-1 >= 0 && j >= 0) then tab.(4) <- g_color src (i+1) j;
+	if((i-1 >= 0) && j >= 0 && i-1 < x-1 && j < y-1) then tab.(0) <- g_color src (i-1) j;
+	if(i >= 0 && (j+1 >= 0) && i < x-1 && j-1 < y-1) then tab.(1) <- g_color src i (j-1);
+	if(i >= 0 && (j+1 >= 0) && i < x-1 && j+1 < y-1) then tab.(2) <- g_color src i (j+1);
+	if((i+1 >= 0) && j >= 0 && i+1 < x-1 && j < y-1) then tab.(3) <- g_color src (i+1) j;
   tab
 
 let average_px tab (e,f,g)= 
@@ -110,8 +111,8 @@ let noNoise_median src =
 let noNoise_average src =
   let dst = src in
   let (w,h) = Image_tools.get_dim src in
-    for i = 0 to (w-1) do
-      for j = 0 to (h-1) do
+    for i = 1 to (w-1) do
+      for j = 1 to (h-1) do
 	Sdlvideo.put_pixel_color dst i j (average_px (get_list src i j) (Sdlvideo.get_pixel_color src i j));
       done;
     done;
