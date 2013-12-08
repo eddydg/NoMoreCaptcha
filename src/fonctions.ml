@@ -55,7 +55,7 @@ let get_list src i j =
   let tab = Array.make 8 (-1,-1,-1) in
   for a = i-1 to i+1 do
     for b = j-1 to j+1 do
-      if (a >= 0 && a < (x-1) && b >= 0 && b < (y-1) && not(a = i) && not(b = j)) then
+      if (a >= 0 && a < (x-1) && b >= 0 && b < (y-1) && not(a = i) && not(b = j) && (not(i = j))) then
       begin  
 	tab.(!n) <- g_color src a b;
         n := !n+1;
