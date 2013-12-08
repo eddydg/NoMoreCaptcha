@@ -42,14 +42,15 @@ let toolbox = GPack.hbox
 	~packing:mainbox#add ()
 
 let textarea =
-  let scroll = GBin.scrolled_window
-    ~hpolicy:`ALWAYS
-    ~vpolicy:`ALWAYS
-    ~shadow_type:`ETCHED_IN
-    ~packing:textbox#add () in
-  let txt = GText.view ~packing:scroll#add () in
-  txt#misc#modify_font_by_name "Monospace 10";
-  txt 
+	let scroll = GBin.scrolled_window
+		~hpolicy:`ALWAYS
+    	~vpolicy:`ALWAYS
+    	~shadow_type:`ETCHED_IN
+    	~packing:textbox#add () in
+	let txt = GText.view ~packing:scroll#add () in
+	txt#misc#modify_font_by_name "Monospace 10";
+	GtkSpell.attach ~lang:"fr_FR" txt;
+	txt 
 
 
 (* ----------- FILE OPERATIONS -------- *)
