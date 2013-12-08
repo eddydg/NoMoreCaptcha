@@ -42,17 +42,27 @@ let toolbox = GPack.hbox
 	~packing:mainbox#add ()
 
 let textarea =
-  let scroll = GBin.scrolled_window
-    ~hpolicy:`ALWAYS
-    ~vpolicy:`ALWAYS
-    ~shadow_type:`ETCHED_IN
-    ~packing:textbox#add () in
-  let txt = GText.view ~packing:scroll#add () in
-  txt#misc#modify_font_by_name "Monospace 10";
-  txt 
+	let scroll = GBin.scrolled_window
+		~hpolicy:`ALWAYS
+    	~vpolicy:`ALWAYS
+    	~shadow_type:`ETCHED_IN
+    	~packing:textbox#add () in
+	let txt = GText.view ~packing:scroll#add () in
+	txt#misc#modify_font_by_name "Monospace 10";
+	GtkSpell.attach ~lang:"fr_FR" txt;
+	txt 
 
 
 (* ----------- FILE OPERATIONS -------- *)
+let getImage () =
+	if Array.length(Sys.argv) < 2 then
+    	failwith "Image Missing!"
+  	else
+    	Sys.argv.(1)
+
+let currentImg = ref (getImage ())
+let currentAngle = ref 0
+
 
  let set_text s () =
   textarea#buffer#set_text s
@@ -65,31 +75,38 @@ let saveFile file =
 let saveFileAs () =
   let title = "Save as" in
   let uri =
-    GToolbox.input_string ~title ~text:"text_output.txt" ~ok:"Save" "" in
+    GToolbox.input_string ~title ~text:"saves/text_output.txt" ~ok:"Save" "" in
   match uri with
   | None -> ()
   | Some uri -> saveFile uri
+
+ let saveImageAs () =
+  let title = "Save as" in
+  let uri =
+    GToolbox.input_string ~title ~text:"saves/new_image.bmp" ~ok:"Save" "" in
+  match uri with
+  | None -> ()
+  | Some uri -> let image = Sdlloader.load_image (!currentImg) in
+  				Sdlvideo.save_BMP image uri
 
 
 
 (* ---------- IMAGE OPERATIONS --------- *)
 
-let getImage () =
-	if Array.length(Sys.argv) < 2 then
-    	failwith "Image Missing!"
-  	else
-    	Sys.argv.(1)
-
-let currentImg = ref (getImage ())
-let currentAngle = ref 0
-
-
-let bSaveImage = 
+let bSaveText = 
 	let button = GButton.button
-		~stock: `SAVE
+		~label:"Save Text"
 		~packing: toolbar#add () in
 		GMisc.image ~stock:`SAVE ~packing:button#set_image ();
 		button#connect#clicked ~callback:saveFileAs;
+		button
+
+let bSaveImage = 
+	let button = GButton.button
+		~label:"Save Image"
+		~packing: toolbar#add () in
+		GMisc.image ~stock:`SAVE ~packing:button#set_image ();
+		button#connect#clicked ~callback:saveImageAs;
 		button
 
 let showImage =
