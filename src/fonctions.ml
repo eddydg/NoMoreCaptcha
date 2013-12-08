@@ -50,18 +50,11 @@ let blackAndWhite src =
 
 (*NOISE REDUCTION*)
 let get_list src i j =
-  let (x,y) = Image_tools.get_dim src
-  and n = ref 0 in
   let tab = Array.make 8 (-1,-1,-1) in
-  for a = i-1 to i+1 do
-    for b = j-1 to j+1 do
-      if (a >= 0 && a < (x-1) && b >= 0 && b < (y-1) && not(a = i) && not(b = j) && (not(i = j))) then
-      begin  
-	tab.(!n) <- g_color src a b;
-        n := !n+1;
-      end
-    done;
-  done;
+	if(i-1 >= 0 && j >= 0) then tab.(1) <- g_color src (i-1) j;
+	if(i-1 >= 0 && j >= 0) then tab.(2) <- g_color src i (j-1);
+	if(i-1 >= 0 && j >= 0) then tab.(3) <- g_color src i (j+1);
+	if(i-1 >= 0 && j >= 0) then tab.(4) <- g_color src (i+1) j;
   tab
 
 let average_px tab (e,f,g)= 
@@ -77,8 +70,11 @@ let average_px tab (e,f,g)=
 	  nb_px := !nb_px + 1;
 	end
     done;
-  let u,v,w = ((!a / !nb_px), (!b / !nb_px), (!c / !nb_px)) in
-  ((u+e)/2,(v+f)/2,(w+g)/2)
+  if(not(!nb_px = 0)) then
+    let u,v,w = ((!a / !nb_px), (!b / !nb_px), (!c / !nb_px)) in
+    ((u+e)/2,(v+f)/2,(w+g)/2)
+  else
+    (0,0,0)
 
 let compare_triplet a b =
 	let level_a = level a in
