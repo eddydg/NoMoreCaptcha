@@ -6,16 +6,13 @@ let defaultPic = ref "text.bmp"
 let help_message () = print_endline "Coucou"
 
 let window = GWindow.window
-	~height: 500
-	~width: 700
+	~height: 600
+	~width: 750
 	~position: `CENTER
 	~title: "NoMoreCaptcha " ()
 
 let mainbox = GPack.vbox
 	~packing: window#add ()
-
-let box = GPack.vbox
-	~packing:mainbox#add ()
 
 
 (* ----------- MAIN BOXES ---------- *)	
@@ -23,13 +20,13 @@ let box = GPack.vbox
 let toolbar = GButton.toolbar
 	~orientation: `HORIZONTAL
 	~style: `BOTH
-	~packing: (box#pack ~expand: false) ()
+	~packing: (mainbox#pack ~expand: false) ()
 
 let centerbox = GPack.hbox
 	~packing: mainbox#add ()
 
 let imagebox = GBin.scrolled_window
-	~height: 300
+	~height: 500
 	~width: 250
 	~packing:centerbox#add ()
 
@@ -127,7 +124,8 @@ let setImage btn () =
 
 let bopenImage = 
 	let button = GFile.chooser_button
-		~title:"Select your image"
+		~title:"Select Image"
+		~width:120
 		~action: `OPEN
 		~packing: toolbar#add () in
 		button#connect#selection_changed ~callback:(setImage button);
@@ -417,7 +415,7 @@ let bAboutUs =
 		~position:`CENTER_ON_PARENT
 		~destroy_with_parent:true () in
 	let button = GButton.button
-		~stock:`ABOUT
+		~label:"About Us"
 		~packing:toolbar#add () in
 	GMisc.image ~stock:`ABOUT ~packing:button#set_image ();
 	button#connect#clicked (fun () ->
