@@ -64,7 +64,7 @@ let get_list src i j =
   done;
   tab
 
-let average_px tab = 
+let average_px tab (e,f,g)= 
   let a,b,c = (ref 0, ref 0, ref 0) in
   let nb_px = ref 0 in
     for i = 0 to ((Array.length tab) - 1) do
@@ -78,7 +78,7 @@ let average_px tab =
 	end
     done;
   let u,v,w = ((!a / !nb_px), (!b / !nb_px), (!c / !nb_px)) in
-  (u,v,w)
+  ((u+e)/2,(v+f)/2,(w+g)/2)
 
 let compare_triplet a b =
 	let level_a = level a in
@@ -116,7 +116,7 @@ let noNoise_average src =
   let (w,h) = Image_tools.get_dim src in
     for i = 0 to (w-1) do
       for j = 0 to (h-1) do
-	Sdlvideo.put_pixel_color dst i j (average_px (get_list src i j));
+	Sdlvideo.put_pixel_color dst i j (average_px (get_list src i j) (Sdlvideo.get_pixel_color src i j));
       done;
     done;
  dst
