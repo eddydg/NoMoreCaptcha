@@ -170,8 +170,9 @@ begin
     let surface2 = Sdlvideo.set_video_mode w2 h2 [`DOUBLEBUF] in
     Tools.print_image img surface2;
     wait_key();*)
+    Printf.printf "Reading document...\n%!";
     let result = ref "" in
-    let net = Network.load "savedNN/arial2.txt" in
+    let net = Network.load "savedNN/fonts.txt" in
     let list1 = Characters.cross_img img in
     for i = 0 to List.length list1 -1 do
         for j = 0 to List.length (List.nth list1 i) -1 do
@@ -184,8 +185,8 @@ begin
                 if not (is_white carac) then begin
                     let tab = Network.normalize carac 12 12 in
                 let p,out = net#run (tab) in
-                myPrint tab 12; (*sert a rien *)
-                Printf.printf "letter: %s\n%!" charset.(p) ;
+                (*myPrint tab 12;*)
+                (*Printf.printf "letter: %s\n%!" charset.(p) ;*)
                 result := charset.(p)^(!result);
                 end;
             done;
@@ -193,6 +194,7 @@ begin
         done;
         result := "\n"^(!result);
     done;
+    Printf.printf "Done.\n%!";
     (!result);
 end
 
@@ -210,8 +212,8 @@ begin
     let charset = [|"0";"1";"2";"3";"4";"5";"6";"7";"8";"9";(*"<";">";",";";";":";"!";"?";".";"/";"§";"%";"£";"€";"&";"ç";"(";")";"[";"]";"{";"}";"=";"+";"-";"*";"/";*)
     "B";"A";"C";"D";"E";"F";"G";"H";"I";"J";"K";"L";"M";"N";"O";"P";"Q";"R";"S";"T";"U";"V";"W";"X";"Y";"Z"
     ;"a";"b";"c";"d";"e";"f";"g";"h";"i";"j";"k";"l";"m";"n";"o";"p";"q";"r";"s";"t";"u";"v";"w";"x";"y";"z"(**)|] in
-    let fontList = [|"fonts/arial.ttf"(*; "fonts/times.ttf"; "fonts/bell.ttf";"fonts/calibrii.ttf";
-                        "fonts/cour.ttf";"fonts/gara.ttf";"fonts/kokila.ttf";"fonts/pala.ttf";"fonts/rod.ttf";"fonts/vani.ttf"*)|] in
+    (*let fontList = [|"fonts/arial.ttf"(*; "fonts/times.ttf"; "fonts/bell.ttf";"fonts/calibrii.ttf";
+                        "fonts/cour.ttf";"fonts/gara.ttf";"fonts/kokila.ttf";"fonts/pala.ttf";"fonts/rod.ttf";"fonts/vani.ttf"*)|] in*)
     
     (*gen_texte "Bonjour\ndoudou" "fonts/arial.ttf" 100;*)
     let texteFinal = read_img img charset in

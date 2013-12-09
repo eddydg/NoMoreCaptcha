@@ -90,8 +90,11 @@ let cross_line img ymin ymax =
 						white := !white && (Sdlvideo.get_pixel_color img x y) > (150,150,150);
 					done;
 					for x2 = x to (x+4) do
-						next_red := (Sdlvideo.get_pixel_color img x2 ymin) = red;
-					done;
+						if (x2+1) < w-1 then
+							next_red := (Sdlvideo.get_pixel_color img x2 ymin) = red
+						else
+							next_red := false
+						done;
 					if !white && not(!next_red) then
 						begin
 							xmax := x;
@@ -139,8 +142,6 @@ let cross_img img =
 
 let surf_test pic = 	
 		let list1 = cross_img pic in
-		let list2 = ref (List.hd list1) in
-		let list3 = ref (List.hd !list2) in
 		for i = 0 to List.length list1 -1 do
 			for j = 0 to List.length (List.nth list1 i) -1 do
 				for k = 0 to List.length (List.nth (List.nth list1 i) j) -1 do

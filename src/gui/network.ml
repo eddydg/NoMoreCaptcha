@@ -60,7 +60,7 @@ let normalize src columns rows =
 		count := !count +1;
 		x := !x +. xInterval;
 	done;
-	Printf.printf"count : %d\n%!" !count;
+	(*Printf.printf"count : %d\n%!" !count;*)
 	res
 
 let readLine f =

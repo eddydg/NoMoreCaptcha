@@ -200,7 +200,7 @@ let wimageRotate () =
 		~title:"Rotation"
 		~height:140
 		~width:200 () in
-	let label = GMisc.label ~text:"Rotating at: " ~packing:dialog#vbox#add () in
+	(*let label = *)GMisc.label ~text:"Rotating at: " ~packing:dialog#vbox#add ();
 	let adj = GData.adjustment
 		~value:(!detectedAngle)
 		~lower:0.0
@@ -325,7 +325,7 @@ let wblackAndWhite () =
 		~title:"BlackAndWhite"
 		~height:160
 		~width:200 () in
-	let label = GMisc.label ~text:"Black and White threshold: " ~packing:dialog#vbox#add () in
+	(*let label = *)GMisc.label ~text:"Black and White threshold: " ~packing:dialog#vbox#add ();
 	let adj = GData.adjustment
 		~value:0.0
 		~lower:0.0
@@ -382,7 +382,7 @@ let carRecognition () =
 	let pic = Sdlloader.load_image(!currentImg) in
 	let charset = [|(*"0";"1";"2";"3";"4";"5";"6";"7";"8";"9";"<";">";",";";";":";"!";"?";".";"/";"§";"%";"£";"€";"&";"ç";"(";")";"[";"]";"{";"}";"=";"+";"-";"*";"/";*)
     "B";"A";"C";"D";"E";"F";"G";"H";"I";"J";"K";"L";"M";"N";"O";"P";"Q";"R";"S";"T";"U";"V";"W";"X";"Y";"Z"
-    ;"a";"b";"c";"d";"e";"f";"g";"h";"i";"j";"k";"l";"m";"n";"o";"p";"q";"r";"s";"t";"u";"v";"w";"x";"y";"z"|] in
+    ;"a";"b";"c";"d";"e";"f";"g";"h";"i";"j";"k";"l";"m";"n";"o";"p";"q";"r";"s";"t";"u";"v";"w";"x";"y";"z"(**);"ou";"un";"an";"qu";"eu";"é";"au"|] in
 	let text = Nn.read_img pic charset in
 	set_text text ()
 
