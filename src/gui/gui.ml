@@ -366,9 +366,9 @@ let bblackAndWhite =
 let carDetection () = 
 	let pic = Sdlloader.load_image(!currentImg) in
 	Detect.circle_this pic;
-	Sdlvideo.save_BMP pic "detect_output.bmp";
+	Sdlvideo.save_BMP pic "output.bmp";
 	Sdl.quit ();
-	showImage#set_file "detect_output.bmp"
+	updateImage "output.bmp"
 
 let bcarDetection =
 	let button = GButton.button
