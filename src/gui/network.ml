@@ -50,7 +50,7 @@ let normalize src columns rows =
 	y := 0.;
 	x := 0.;
 	while !count < taille do
-		if !x >= float_of_int (w-1) then
+		if !x > float_of_int (w-1) then
 		begin
 			x := 0.;
 			y := !y +. yInterval;

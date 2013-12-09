@@ -171,7 +171,7 @@ begin
     Tools.print_image img surface2;
     wait_key();*)
     let result = ref "" in
-    let net = Network.load "savedNN/arial.txt" in
+    let net = Network.load "savedNN/arial2.txt" in
     let list1 = Characters.cross_img img in
     for i = 0 to List.length list1 -1 do
         for j = 0 to List.length (List.nth list1 i) -1 do

@@ -45,7 +45,7 @@ let cross_word img xmin xmax ymin ymax =
 		let list_of_char = ref [] in
 		let charac = ref false in
 		let count = ref 0 in
-		for x = xmin to xmax do
+		for x = xmin -1 to xmax do
 			if not(!charac) && (Sdlvideo.get_pixel_color img x (ymin+1)) = red then
 				begin
 					charac := true;
