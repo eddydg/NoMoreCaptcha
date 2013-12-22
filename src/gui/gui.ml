@@ -9,6 +9,7 @@ let window = GWindow.window
 	~height: 600
 	~width: 750
 	~position: `CENTER
+	~resizable: false
 	~title: "NoMoreCaptcha " ()
 
 let mainbox = GPack.vbox
@@ -34,8 +35,9 @@ let textbox = GPack.vbox
 	~packing:centerbox#add ()
 
 let toolbox = GPack.hbox
-	~spacing: 5
-	~border_width: 10
+	~height: 50
+	~spacing: 3
+	~border_width: 7
 	~packing:mainbox#add ()
 
 let textarea =
